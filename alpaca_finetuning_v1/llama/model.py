@@ -174,17 +174,17 @@ class Transformer(nn.Module):
         super().__init__()
         self.params = params
         self.vocab_size = params.vocab_size
-        self.n_layers = params.n_layers
+        self.n_layers = params.n_layers # LLaMA의 transformer layer 수, 32
         self.tok_embeddings = Embedding(params.vocab_size, params.dim)
 
         self.adapter_query = nn.Embedding(params.adapter_len * params.adapter_layer, params.dim)
-        self.adapter_len = params.adapter_len
-        self.adapter_layer = params.adapter_layer
+        self.adapter_len = params.adapter_len # 10 -> 논문에서 k 값
+        self.adapter_layer = params.adapter_layer # 30 -> adapter를 삽입할 transformer layer의 번호
 
         self.criterion = torch.nn.CrossEntropyLoss(ignore_index=0)
 
         self.layers = torch.nn.ModuleList()
-        for layer_id in range(params.n_layers):
+        for layer_id in range(params.n_layers): 
             self.layers.append(TransformerBlock(layer_id, params))
 
         self.norm = RMSNorm(params.dim, eps=params.norm_eps)
@@ -194,23 +194,27 @@ class Transformer(nn.Module):
 
     def forward(self, examples, labels):
 
-        _bsz, seqlen = examples.shape
+        _bsz, seqlen = examples.shape # 입력 x 값
 
         with torch.no_grad():
             h = self.tok_embeddings(examples)
             freqs_cis = self.freqs_cis.to(h.device)
             freqs_cis = freqs_cis[:seqlen]
             mask = None
-            mask = torch.full((1, 1, seqlen, seqlen), float("-inf"), device=h.device)
+            mask = torch.full((1, 1, seqlen, seqlen), float("-inf"), device=h.device) # LLaMA와 동일한 부분
             mask = torch.triu(mask, diagonal=0 + 1).type_as(h)
             start_pos = 0
+            
+            # self.layers[: -30] 까지 for 문 순회, 이 부분 이해 안됨, self.layers[:30] 이 맞는 것이 아닌지?
+            # adapter 이전까지의 layer를 구성하는 코드
             for layer in self.layers[: -1 * self.adapter_layer]:
                 h = layer(h, start_pos, freqs_cis, mask)
-
+                
+        # adapter 에 필요한 코드
         adapter_index = 0
-        adapter = self.adapter_query.weight.reshape(-1, self.adapter_len, 4096).unsqueeze(1)
-        for layer in self.layers[-1 * self.adapter_layer :]:
-            h = layer(h, start_pos, freqs_cis, mask, adapter[adapter_index].half())
+        adapter = self.adapter_query.weight.reshape(-1, self.adapter_len, 4096).unsqueeze(1) # [?, 1, 10, 4096]
+        for layer in self.layers[-1 * self.adapter_layer :]: # self.layers[-30:] 인데 왜..?
+            h = layer(h, start_pos, freqs_cis, mask, adapter[adapter_index].half()) # adapter[0] -> [1, 10, 4096]
             adapter_index = adapter_index + 1
 
         h = self.norm(h)
