@@ -112,11 +112,12 @@ class LLaMA_adapter(nn.Module):
     def clip_encode_image(self, x):
         # modified from CLIP
         x = self.clip.visual.conv1(x)  # shape = [*, width, grid, grid]
-        # shape = [*, width, grid ** 2]
-        x = x.reshape(x.shape[0], x.shape[1], -1)
+        x = x.reshape(x.shape[0], x.shape[1], -1) # shape = [*, width, grid ** 2], 2차원으로 flatten
         x = x.permute(0, 2, 1)  # shape = [*, grid ** 2, width]
+        # shape = [*, grid ** 2 + 1, width], cls embedding 추가
         x = torch.cat([self.clip.visual.class_embedding.to(x.dtype) + torch.zeros(x.shape[0], 1,
-                      x.shape[-1], dtype=x.dtype, device=x.device), x], dim=1)  # shape = [*, grid ** 2 + 1, width]
+                      x.shape[-1], dtype=x.dtype, device=x.device), x], dim=1)  
+        # positional_embedding 추가, x.dtype는 데이터 타입을 일치 시키는 것임
         x = x + self.clip.visual.positional_embedding.to(x.dtype)
         x = self.clip.visual.ln_pre(x)
 
@@ -151,7 +152,7 @@ class LLaMA_adapter(nn.Module):
     def forward(self, tokens, labels, imgs):
         visual_query = self.forward_visual(imgs)
 
-        _bsz, seqlen = tokens.shape
+        _bsz, seqlen = tokens.shape # bsz -> batch size 
 
         h = self.llama.tok_embeddings(tokens)
         freqs_cis = self.llama.freqs_cis.to(h.device)
@@ -166,8 +167,8 @@ class LLaMA_adapter(nn.Module):
         adapter = self.adapter_query.weight.reshape(self.query_layer, self.query_len, -1).unsqueeze(1)
         adapter_index = 0
         for layer in self.llama.layers[-1 * self.query_layer:]:
-            dynamic_adapter = adapter[adapter_index].repeat(_bsz, 1, 1)
-            dynamic_adapter = dynamic_adapter + visual_query
+            dynamic_adapter = adapter[adapter_index].repeat(_bsz, 1, 1) # batch size 만큼 adapter[adapter_index]를 반복
+            dynamic_adapter = dynamic_adapter + visual_query # visual_query의 shape 확인 필요
             h = layer(h, 0, freqs_cis, mask, dynamic_adapter)
             adapter_index = adapter_index + 1
 
