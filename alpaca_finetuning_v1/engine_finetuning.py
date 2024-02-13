@@ -19,12 +19,12 @@ def train_one_epoch(
 ):
 
     model.train(True)
-    metric_logger = misc.MetricLogger(delimiter="  ")
+    metric_logger = misc.MetricLogger(delimiter="  ") # lr 저장할 때 사용, format 
     metric_logger.add_meter("lr", misc.SmoothedValue(window_size=1, fmt="{value:.6f}"))
-    header = "Epoch: [{}]".format(epoch)
+    header = "Epoch: [{}]".format(epoch) # text 어떻게 찍을지
     print_freq = 10
 
-    accum_iter = args.accum_iter
+    accum_iter = args.accum_iter # grad를 몇 iteration 마다 한번 넘길지
 
     optimizer.zero_grad()
 
@@ -42,7 +42,7 @@ def train_one_epoch(
         loss_value = loss.item()
         c_loss_value = c_loss.item()
 
-        if not math.isfinite(loss_value):
+        if not math.isfinite(loss_value): # loss 가 NaN이면 정지
             print("Loss is {}, stopping training".format(loss_value))
             sys.exit(1)
 
@@ -59,7 +59,7 @@ def train_one_epoch(
         lr = optimizer.param_groups[0]["lr"]
         metric_logger.update(lr=lr)
 
-        misc.all_reduce_mean(loss_value)
+        misc.all_reduce_mean(loss_value) # loss value를 하나로 동기화, 작동 방법 확인 필요
         c_loss_value_reduce = misc.all_reduce_mean(c_loss_value)
 
         if log_writer is not None and (data_iter_step + 1) % accum_iter == 0:
