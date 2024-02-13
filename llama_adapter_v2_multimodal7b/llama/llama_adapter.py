@@ -137,8 +137,8 @@ class LLaMA_adapter(nn.Module):
         clip_feats = self.clip_encode_image(imgs)
         clip_feats = self.clip_proj_norm(self.clip_proj(clip_feats.float()))
 
-        visual_query = self.visual_query.weight.unsqueeze(
-            0).repeat(len(imgs), 1, 1)
+        visual_query = self.visual_query.weight.unsqueeze( 
+            0).repeat(len(imgs), 1, 1) # batch size 만큼 반복, 아래의 170번째 line 과 연결되는 듯
         visual_query = torch.cat([visual_query, clip_feats], dim=1)
         for block in self.visual_blocks:
             visual_query = block(visual_query)
