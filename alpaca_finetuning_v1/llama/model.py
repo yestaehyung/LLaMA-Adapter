@@ -201,8 +201,8 @@ class Transformer(nn.Module):
             freqs_cis = self.freqs_cis.to(h.device)
             freqs_cis = freqs_cis[:seqlen]
             mask = None
-            mask = torch.full((1, 1, seqlen, seqlen), float("-inf"), device=h.device) # LLaMA와 동일한 부분
-            mask = torch.triu(mask, diagonal=0 + 1).type_as(h)
+            mask = torch.full((1, 1, seqlen, seqlen), float("-inf"), device=h.device) # mask tensor 생성, Look-ahead masking 수행
+            mask = torch.triu(mask, diagonal=0 + 1).type_as(h) # mask 에 triangular matrix를 적용
             start_pos = 0
             
             # self.layers[: -30] 까지 for 문 순회, 이 부분 이해 안됨, self.layers[:30] 이 맞는 것이 아닌지?
