@@ -94,15 +94,15 @@ class Attention(nn.Module):
         xk = xk.view(bsz, seqlen, self.n_local_heads, self.head_dim)
         xv = xv.view(bsz, seqlen, self.n_local_heads, self.head_dim)
 
-        xq, xk = apply_rotary_emb(xq, xk, freqs_cis=freqs_cis)
+        xq, xk = apply_rotary_emb(xq, xk, freqs_cis=freqs_cis) # shape
 
-        if adapter is not None:
-            adapter_len = adapter.shape[1]
+        if adapter is not None: # [1, 10, 4096]
+            adapter_len = adapter.shape[1] # 10 
             adapter_k = self.wk(adapter).view(1, adapter_len, self.n_local_heads, self.head_dim).repeat(bsz, 1, 1, 1)
             adapter_v = self.wv(adapter).view(1, adapter_len, self.n_local_heads, self.head_dim).repeat(bsz, 1, 1, 1)
             xk = torch.cat([adapter_k, xk], dim=1)
             xv = torch.cat([adapter_v, xv], dim=1)
-            extra_mask = torch.zeros(1, 1, seqlen, adapter_len).to(mask)
+            extra_mask = torch.zeros(1, 1, seqlen, adapter_len).to(mask) # 열의 개수가 10개 늘어난다
             mask = torch.cat([extra_mask, mask], dim=-1)
         keys = xk
         values = xv
@@ -212,7 +212,7 @@ class Transformer(nn.Module):
                 
         # adapter 에 필요한 코드
         adapter_index = 0
-        adapter = self.adapter_query.weight.reshape(-1, self.adapter_len, 4096).unsqueeze(1) # [?, 1, 10, 4096]
+        adapter = self.adapter_query.weight.reshape(-1, self.adapter_len, 4096).unsqueeze(1) # [30, 1, 10, 4096]
         for layer in self.layers[-1 * self.adapter_layer :]: # self.layers[-30:] 인데 왜..?
             h = layer(h, start_pos, freqs_cis, mask, adapter[adapter_index].half()) # adapter[0] -> [1, 10, 4096]
             adapter_index = adapter_index + 1
