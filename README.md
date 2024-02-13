@@ -1,37 +1,8 @@
-# LLaMA-Adapter 모델에 대한 코드 리뷰를 하기 위해 fork한 repository
-
-# LLaMA-Adapter: Efficient Fine-tuning of LLaMA 🚀
+# LLaMA-Adapter: Efficient Fine-tuning of LLaMA 🚀 모델에 대한 코드 리뷰를 하기 위해 fork한 repository
 
 Official implementation of ['LLaMA-Adapter: Efficient Fine-tuning of Language Models with Zero-init Attention'](https://arxiv.org/pdf/2303.16199.pdf) and ['LLaMA-Adapter V2: Parameter-Efficient Visual Instruction Model'](https://arxiv.org/pdf/2304.15010.pdf).
 
-<p align="center">                                                                                                                                          <img src="docs/logo_v4.png"/ width="100%"> <br>
-</p>
-
-
 This repo proposes **LLaMA-Adapter (V2)**, a lightweight adaption method for fine-tuning **Instruction-following** and **Multi-modal** [LLaMA](https://github.com/facebookresearch/llama) models 🔥.
-
-Try out the web demo 🤗 of LLaMA-Adapter: [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/csuhan/LLaMA-Adapter), [LLaMA-Adapter V2](http://llama-adapter.opengvlab.com/) and [ImageBind-LLM](http://imagebind-llm.opengvlab.com/).
-
-Join us at [Wechat](https://github.com/Alpha-VLLM/LLaMA2-Accessory/blob/main/docs/wechat.md)!
-
-## News
-- **[2024.01.18]** [LLaMA-Adapter](https://arxiv.org/pdf/2303.16199.pdf) is accepted by **ICLR 2024**!🎉
-- **[2023.12.08]** We release [OneLLM](https://github.com/csuhan/OneLLM) which aligns **eight** modalities to language using a unified framework.🔥🔥🔥
-- **[2023.11.11]** We release [SPHINX](https://github.com/Alpha-VLLM/LLaMA2-Accessory/tree/main/SPHINX), a new multi-modal LLM, which is a huge leap from LLaMa-Adapter-V2.🔥🔥🔥
-- **[2023.10.11]** We realse **LLaMA-Adapter V2.1**, an improved version of LLaMA-Adapter V2 with stronger multi-modal reasoning performance. Check [llama_adapter_v2_multimodal7b](llama_adapter_v2_multimodal7b) for details.
-- **[2023.08.28]** We release quantized LLM with [OmniQuant](https://github.com/OpenGVLab/OmniQuant), which is an efficient, accurate, and omnibearing (even extremely low bit) quantization algorithm. Multimodal version is coming soon.🔥🔥🔥
-- **[2023.07.24]** We release **[LLaMA2-Accessory](https://github.com/Alpha-VLLM/LLaMA2-Accessory)**, an open-source toolkit for **pre-training**, **fine-tuning** and **deployment** of **Large Language Models (LLMs)** and **mutlimodal LLMs**. Please check [Alpha-VLLM/LLaMA2-Accessory](https://github.com/Alpha-VLLM/LLaMA2-Accessory) for more details!🔥🔥🔥
-- **[2023.07.05]** We release the pretrain/finetune code of [llama_adapter_v2_multimodal7b](https://github.com/OpenGVLab/LLaMA-Adapter/tree/main/llama_adapter_v2_multimodal7b).
-- **[2023.07.04]** We release the code for reproducing [Gorilla](https://github.com/ShishirPatil/gorilla) by both full finetune and LLaMA-Adapter, please see [gorilla/README.md](https://github.com/OpenGVLab/LLaMA-Adapter/blob/main/gorilla/README.md).
-- **[2023.06.08]** We release the [demo](http://imagebind-llm.opengvlab.com/) of ImageBind-LLM.
-- **[2023.06.06]** We release [Point-Bind](https://github.com/ZrrSkywalker/Point-Bind) to extend ImageBind with 3D point clouds, which achieves 3D instruction-following capacity for [imagebind_LLM](imagebind_LLM).
-- **[2023.06.05]** We support the integration of LLaMA-Adapter (both V1 and V2) and [LangChain](https://python.langchain.com/en/latest/index.html). Check out the [Notebook](/docs/langchain_LLaMA_AdapterV2_demo.ipynb).
-- **[2023.05.29]** We release the code of ImageBind-LLM at [imagebind_LLM](imagebind_LLM).
-- **[2023.05.23]** We release the [demos](http://llama-adapter.opengvlab.com/) and [multi-modal code](llama_adapter_v2_multimodal7b) of LLaMA-Adapter V2!
-- **[2023.05.05]** We release the paper and code of our new work [Personalize Segment Anything](https://github.com/ZrrSkywalker/Personalize-SAM), which efficiently fine-tunes Segment Anything with **10 seconds**, and improves DreamBooth for better **text-to-image generation**. 
-- **[2023.04.30]** We noticed that GPT-4 evaluation has a strong positional bias in favor of the first response. We will soon update the paper to reveal the position bias. Great thanks to [Canwen Xu](https://scholar.google.com/citations?user=oopKCDMAAAAJ&hl=en).
-- **[2023.04.28]** We release **LLaMA-Adapter V2**, a multi-modal instruction model. Check out our [paper](https://arxiv.org/abs/2304.15010), [demos](#demos) and [code](llama_adapter_v2_chat65b)!
-- **[2023.03.28]**  The [paper](https://arxiv.org/pdf/2303.16199.pdf) and [training code](alpaca_finetuning_v1) for **LLaMA-Adapter V1** are released. 📌
 
 
 ## Released Models 
