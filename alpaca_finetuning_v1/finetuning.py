@@ -173,8 +173,8 @@ def main(args):
     print(dataset_val)
 
     if True:  # args.distributed:
-        num_tasks = misc.get_world_size()
-        global_rank = misc.get_rank()
+        num_tasks = misc.get_world_size() # 총 gpu 개수 
+        global_rank = misc.get_rank() # 각자의 gpu 번호 할당 1,2,3,4 
         sampler_train = torch.utils.data.DistributedSampler(
             dataset_train, num_replicas=num_tasks, rank=global_rank, shuffle=True
         )
@@ -184,9 +184,10 @@ def main(args):
         )
 
         print("Sampler_train = %s" % str(sampler_train))
-    else:
+    else: # gpu 하나 일 때 해당
         sampler_train = torch.utils.data.RandomSampler(dataset_train)
-
+        
+    # logger 가 중복되지 않도록 한개만 설정
     if global_rank == 0 and args.log_dir is not None:
         os.makedirs(args.log_dir, exist_ok=True)
         log_writer = SummaryWriter(log_dir=args.log_dir)
@@ -215,7 +216,7 @@ def main(args):
     model = models_llama_adapter.__dict__[args.model](args)
 
     model.to(device)
-
+    
     model_without_ddp = model
     print("Model = %s" % str(model_without_ddp))
 
@@ -230,15 +231,15 @@ def main(args):
     print("accumulate grad iterations: %d" % args.accum_iter)
     print("effective batch size: %d" % eff_batch_size)
 
-    if args.distributed:
+    if args.distributed: # 분산처리
         model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.gpu], find_unused_parameters=True)
-        model_without_ddp = model.module
+        model_without_ddp = model.module # 분산처리가 안된 모델, test에서 사용
 
     # following timm: set wd as 0 for bias and norm layers
     param_groups = optim_factory.param_groups_weight_decay(model_without_ddp, args.weight_decay)
     optimizer = torch.optim.AdamW(param_groups, lr=args.lr, betas=(0.9, 0.95))
     print(optimizer)
-    loss_scaler = NativeScaler()
+    loss_scaler = NativeScaler() # 대부분 공통적으로 쓰는데, 기본적으로 해줘야하는 단계가 있는데 조금 편하게 해줌
 
     misc.load_model(args=args, model_without_ddp=model_without_ddp, optimizer=optimizer, loss_scaler=loss_scaler)
 
@@ -246,7 +247,7 @@ def main(args):
     start_time = time.time()
     for epoch in range(args.start_epoch, args.epochs):
 
-        if args.distributed:
+        if args.distributed: # epoch 설정해야지 돌아간다
             data_loader_train.sampler.set_epoch(epoch)
             data_loader_val.sampler.set_epoch(epoch)
 
